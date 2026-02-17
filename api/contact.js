@@ -1,6 +1,4 @@
 // Vercel Serverless Function for Contact Form
-const nodemailer = require('nodemailer');
-
 module.exports = async (req, res) => {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -47,9 +45,12 @@ module.exports = async (req, res) => {
             date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
         };
 
-        // Send email notification (if configured)
+        // Try to send email notification only if credentials are provided
         if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
             try {
+                // Dynamic import for nodemailer to avoid crashes
+                const nodemailer = require('nodemailer');
+                
                 const transporter = nodemailer.createTransport({
                     service: 'gmail',
                     auth: {
@@ -112,7 +113,8 @@ module.exports = async (req, res) => {
         console.error('Error processing enquiry:', error);
         res.status(500).json({
             success: false,
-            message: 'Error submitting enquiry. Please try again or contact us via WhatsApp.'
+            message: 'Error submitting enquiry. Please try again or contact us via WhatsApp.',
+            error: error.message
         });
     }
 };
